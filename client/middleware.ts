@@ -2,10 +2,12 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
+  // 1. Create an un-mutated response
   let supabaseResponse = NextResponse.next({
     request,
   })
 
+  // 2. Initialize the Supabase client
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -15,7 +17,7 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
           supabaseResponse = NextResponse.next({
             request,
           })
@@ -27,7 +29,7 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // This safely refreshes the auth session token without causing Edge exceptions
+  // 3. This safely refreshes the token without triggering Edge invocation errors
   await supabase.auth.getUser()
 
   return supabaseResponse
