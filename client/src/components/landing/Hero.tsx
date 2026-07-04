@@ -9,7 +9,7 @@ export default function Hero() {
 
       <h1 className="mt-8 max-w-5xl text-6xl font-black tracking-tight md:text-8xl">
         Learn Smarter with{" "}
-        <span className="text-blue-500">EduMind AI</span>
+        <span className="text-blue-500">EduAir AI</span>
       </h1>
 
       <p className="mt-8 max-w-2xl text-lg text-zinc-400">
