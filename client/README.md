@@ -1,4 +1,4 @@
-# EduMind AI
+# EduAir AI
 
 An AI study assistant built with Next.js, Supabase (auth + database), and Google Gemini.
 
