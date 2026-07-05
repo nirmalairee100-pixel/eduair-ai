@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
-// 1. Export the Conversation type that DashboardShell is trying to import
+// Export the type so DashboardShell can import it safely
 export type Conversation = {
   id: string;
   title: string;
@@ -31,19 +31,19 @@ const NAV_ITEMS = [
   { href: "/dashboard/planner", label: "Study Planner", icon: CalendarDays },
 ];
 
-// 2. Add the missing props expected by DashboardShell
+// Made the chat-specific items optional (?) so layout.tsx doesn't crash the build
 interface SidebarProps {
   userEmail: string;
-  conversations: Conversation[];
-  activeId: string | null;
-  onSelect: (id: string | null) => void;
-  onNewChat: () => void;
+  conversations?: Conversation[];
+  activeId?: string | null;
+  onSelect?: (id: string | null) => void;
+  onNewChat?: () => void;
 }
 
 export default function Sidebar({
   userEmail,
-  conversations,
-  activeId,
+  conversations = [], // Defaults to an empty list if not provided
+  activeId = null,    // Defaults to null if not provided
   onSelect,
   onNewChat,
 }: SidebarProps) {
@@ -90,25 +90,27 @@ export default function Sidebar({
           );
         })}
 
-        {/* 3. If the user is on the chat route, show their active conversations list */}
-        {pathname?.startsWith("/dashboard/chat") && (
+        {/* Displays the chat navigation conditionally if on the chat route */}
+        {pathname?.startsWith("/dashboard/chat") && conversations.length > 0 && (
           <div className="mt-4 pt-4 border-t border-slate-100">
             <div className="flex items-center justify-between px-3 mb-2">
               <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
                 Recent Chats
               </span>
-              <button
-                onClick={onNewChat}
-                className="text-xs text-indigo-600 hover:text-indigo-800 font-medium"
-              >
-                + New
-              </button>
+              {onNewChat && (
+                <button
+                  onClick={onNewChat}
+                  className="text-xs text-indigo-600 hover:text-indigo-800 font-medium"
+                >
+                  + New
+                </button>
+              )}
             </div>
             <div className="space-y-1">
               {conversations.map((chat) => (
                 <button
                   key={chat.id}
-                  onClick={() => onSelect(chat.id)}
+                  onClick={() => onSelect?.(chat.id)}
                   className={`w-full text-left truncate block rounded-lg px-3 py-2 text-sm transition-colors ${
                     activeId === chat.id
                       ? "bg-slate-100 text-slate-900 font-medium"
