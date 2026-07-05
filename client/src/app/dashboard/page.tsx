@@ -1,6 +1,13 @@
 import Link from "next/link";
-import { MessageSquare, FileText, Sparkles, NotebookPen, ArrowRight } from "lucide-react";
+import {
+  MessageSquare,
+  FileText,
+  Sparkles,
+  NotebookPen,
+  ArrowRight,
+} from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 
 const QUICK_ACTIONS = [
   {
@@ -42,23 +49,31 @@ function greeting() {
 
 export default async function DashboardHome() {
   const supabase = await createClient();
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // ✅ FIX: Protect dashboard if not logged in
+  if (!user) {
+    redirect("/"); // or "/login" if you have it
+  }
+
   const { data: profile } = await supabase
     .from("profiles")
     .select("full_name")
-    .eq("id", user!.id)
+    .eq("id", user.id)
     .single();
 
   const firstName =
-    profile?.full_name?.split(" ")[0] || user?.email?.split("@")[0] || "there";
+    profile?.full_name?.split(" ")[0] ||
+    user.email?.split("@")[0] ||
+    "there";
 
   const { data: recentConvos } = await supabase
     .from("conversations")
     .select("id, title, created_at")
-    .eq("user_id", user!.id)
+    .eq("user_id", user.id)
     .order("created_at", { ascending: false })
     .limit(3);
 
@@ -67,16 +82,22 @@ export default async function DashboardHome() {
       <h1 className="text-2xl font-bold text-slate-900">
         {greeting()}, {firstName}! 👋
       </h1>
-      <p className="mt-1 text-slate-500">What do you want to learn today?</p>
 
+      <p className="mt-1 text-slate-500">
+        What do you want to learn today?
+      </p>
+
+      {/* QUICK ACTIONS */}
       <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {QUICK_ACTIONS.map(({ href, icon: Icon, label, desc, color }) => (
           <Link
             key={href}
             href={href}
-            className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+            className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md cursor-pointer"
           >
-            <div className={`mb-3 flex h-9 w-9 items-center justify-center rounded-lg ${color}`}>
+            <div
+              className={`mb-3 flex h-9 w-9 items-center justify-center rounded-lg ${color}`}
+            >
               <Icon size={18} />
             </div>
             <p className="font-semibold text-slate-900">{label}</p>
@@ -85,9 +106,13 @@ export default async function DashboardHome() {
         ))}
       </div>
 
+      {/* CONTINUE LEARNING */}
       <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-semibold text-slate-900">Continue Learning</h2>
+          <h2 className="font-semibold text-slate-900">
+            Continue Learning
+          </h2>
+
           <Link
             href="/dashboard/chat"
             className="flex items-center gap-1 text-sm font-medium text-indigo-600 hover:underline"
