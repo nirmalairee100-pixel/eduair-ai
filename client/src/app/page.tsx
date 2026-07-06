@@ -1,10 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
 export default function HomePage() {
-  const router = useRouter();
   const [activeTab, setActiveTab] = useState("chat");
   const [chatInput, setChatInput] = useState("");
   const [chatMessages, setChatMessages] = useState([
@@ -43,7 +41,7 @@ export default function HomePage() {
 
       {/* FIXED PREMIUM NAVBAR */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-slate-950/70 backdrop-blur-md border-b border-slate-900/80 h-16 flex items-center justify-between px-4 sm:px-8 max-w-7xl mx-auto">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2.5 cursor-pointer" onClick={() => router.push("/")}>
+        <a href="/" className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2.5 cursor-pointer">
           <div className="flex items-center gap-2">
             <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center font-black text-sm text-white shadow-md border border-blue-400/20">
               E
@@ -55,7 +53,7 @@ export default function HomePage() {
           <span className="text-[10px] font-mono text-slate-500 sm:border-l sm:border-slate-800 sm:pl-2.5">
             Founded by Nirmal Airee
           </span>
-        </div>
+        </a>
 
         <div className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-400">
           <a href="#features" className="hover:text-white transition-colors">Features</a>
@@ -63,12 +61,12 @@ export default function HomePage() {
           <a href="#about" className="hover:text-white transition-colors">About Us</a>
         </div>
 
-        <button
-          onClick={() => router.push("/dashboard")}
-          className="bg-blue-600 hover:bg-blue-500 text-white font-medium text-sm px-4 py-2 rounded-xl transition-all shadow-md shadow-blue-600/10"
+        <a
+          href="/dashboard"
+          className="bg-blue-600 hover:bg-blue-500 text-white font-medium text-sm px-4 py-2 rounded-xl transition-all shadow-md shadow-blue-600/10 text-center block"
         >
           Open Dashboard
-        </button>
+        </a>
       </nav>
 
       {/* GOD-LEVEL HERO SECTION */}
@@ -91,15 +89,15 @@ export default function HomePage() {
         </p>
 
         <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
-          <button
-            onClick={() => router.push("/dashboard")}
-            className="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm px-6 py-3.5 rounded-xl transition-all shadow-lg shadow-blue-600/10"
+          <a
+            href="/dashboard"
+            className="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm px-6 py-3.5 rounded-xl transition-all shadow-lg shadow-blue-600/10 text-center block"
           >
             Continue with Google
-          </button>
+          </a>
           <a
             href="#features"
-            className="w-full sm:w-auto border border-slate-900 bg-slate-900/20 text-slate-300 hover:text-white text-sm font-medium px-6 py-3.5 rounded-xl transition-all block"
+            className="w-full sm:w-auto border border-slate-900 bg-slate-900/20 text-slate-300 hover:text-white text-sm font-medium px-6 py-3.5 rounded-xl transition-all block text-center"
           >
             Explore Features
           </a>
