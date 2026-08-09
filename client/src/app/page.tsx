@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import LoginButton from "@/components/landing/LoginButton";
 
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState("chat");
@@ -61,12 +62,11 @@ export default function HomePage() {
           <a href="#about" className="hover:text-white transition-colors">About Us</a>
         </div>
 
-        <a
-          href="/dashboard"
+        <LoginButton
+          label="Open Dashboard"
+          showIcon={false}
           className="bg-blue-600 hover:bg-blue-500 text-white font-medium text-sm px-4 py-2 rounded-xl transition-all shadow-md shadow-blue-600/10 text-center block"
-        >
-          Open Dashboard
-        </a>
+        />
       </nav>
 
       {/* GOD-LEVEL HERO SECTION */}
@@ -89,12 +89,10 @@ export default function HomePage() {
         </p>
 
         <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
-          <a
-            href="/dashboard"
+          <LoginButton
+            showIcon={false}
             className="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm px-6 py-3.5 rounded-xl transition-all shadow-lg shadow-blue-600/10 text-center block"
-          >
-            Continue with Google
-          </a>
+          />
           <a
             href="#features"
             className="w-full sm:w-auto border border-slate-900 bg-slate-900/20 text-slate-300 hover:text-white text-sm font-medium px-6 py-3.5 rounded-xl transition-all block text-center"
