@@ -130,10 +130,13 @@ export default function Sidebar({
 
       {/* PRO CONSOLE SUBSCRIPTION MODULE */}
       <div className="px-3 pb-4">
-        <button className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-900 bg-slate-900/30 hover:bg-slate-900/50 hover:border-slate-800 transition-all px-3 py-2.5 text-xs font-semibold text-slate-300 group">
+        <Link
+          href="/pricing"
+          className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-900 bg-slate-900/30 hover:bg-slate-900/50 hover:border-slate-800 transition-all px-3 py-2.5 text-xs font-semibold text-slate-300 group"
+        >
           <Crown size={13} className="text-amber-500 group-hover:scale-105 transition-transform" />
           <span>Elevate Premium Engine</span>
-        </button>
+        </Link>
       </div>
 
       {/* USER ID SESSION GATEWAY ENTRY */}
