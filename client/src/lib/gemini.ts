@@ -1,6 +1,42 @@
 import { GoogleGenAI } from "@google/genai";
+import {
+  generateWithOpenAI,
+  generateWithAnthropic,
+  generateVisionWithOpenAI,
+  generateVisionWithAnthropic,
+} from "@/lib/ai-fallback-providers";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
+// Supports multiple Gemini API keys (e.g. from different Google
+// accounts/projects) to spread quota across them. Set GEMINI_API_KEY
+// as usual, plus GEMINI_API_KEY_2, GEMINI_API_KEY_3, etc. for
+// additional keys — any that aren't set are simply skipped, so this
+// works fine with just one key too.
+const GEMINI_KEYS = [
+  process.env.GEMINI_API_KEY,
+  process.env.GEMINI_API_KEY_2,
+  process.env.GEMINI_API_KEY_3,
+  process.env.GEMINI_API_KEY_4,
+  process.env.GEMINI_API_KEY_5,
+].filter((key): key is string => Boolean(key));
+
+if (GEMINI_KEYS.length === 0) {
+  throw new Error("No Gemini API key configured (GEMINI_API_KEY is required)");
+}
+
+const clients = GEMINI_KEYS.map((apiKey) => new GoogleGenAI({ apiKey }));
+
+// Module-level counter for round-robin key selection. Resets on cold
+// start, which is fine — it just needs to spread load across warm
+// requests, not guarantee perfectly even distribution over time.
+let keyCursor = 0;
+function nextKeyOrder(): number[] {
+  const start = keyCursor;
+  keyCursor = (keyCursor + 1) % clients.length;
+  // Returns the key indices in rotation order starting from `start`,
+  // so if the round-robin pick is out of quota, the same call still
+  // falls through to the other keys before giving up on Gemini.
+  return Array.from({ length: clients.length }, (_, i) => (start + i) % clients.length);
+}
 
 const MODELS = ["gemini-3-flash-preview", "gemini-2.5-flash", "gemini-2.5-flash-lite"];
 
@@ -31,26 +67,41 @@ export async function generateWithRetry(
 ) {
   let lastError: unknown;
 
-  for (let attempt = 0; attempt < MODELS.length; attempt++) {
-    try {
-      return await ai.models.generateContent({
-        model: MODELS[attempt],
-        contents,
-        config: {
-          systemInstruction,
-          ...(responseMimeType ? { responseMimeType } : {}),
-        },
-      });
-    } catch (err) {
-      lastError = err;
-      const status = (err as { status?: number })?.status;
-      // Only retry on transient server-side errors, not on bad requests/auth.
-      if (status !== 503 && status !== 429) throw err;
-      if (attempt < MODELS.length - 1) {
-        await new Promise((r) => setTimeout(r, 800 * (attempt + 1)));
+  for (const keyIndex of nextKeyOrder()) {
+    const ai = clients[keyIndex];
+    for (let attempt = 0; attempt < MODELS.length; attempt++) {
+      try {
+        return await ai.models.generateContent({
+          model: MODELS[attempt],
+          contents,
+          config: {
+            systemInstruction,
+            ...(responseMimeType ? { responseMimeType } : {}),
+          },
+        });
+      } catch (err) {
+        lastError = err;
+        const status = (err as { status?: number })?.status;
+        // Only retry on transient server-side errors, not on bad requests/auth.
+        if (status !== 503 && status !== 429) throw err;
+        if (attempt < MODELS.length - 1) {
+          await new Promise((r) => setTimeout(r, 800 * (attempt + 1)));
+        }
       }
     }
   }
+
+  // Every Gemini key/model combination failed (or is overloaded) — try
+  // other providers before giving up entirely. Each is a no-op if its
+  // key isn't set.
+  for (const fallback of [generateWithOpenAI, generateWithAnthropic]) {
+    try {
+      return await fallback(contents, systemInstruction, responseMimeType);
+    } catch (err) {
+      lastError = err;
+    }
+  }
+
   throw lastError;
 }
 
@@ -65,30 +116,44 @@ export async function generateVisionWithRetry(
 ) {
   let lastError: unknown;
 
-  for (let attempt = 0; attempt < VISION_MODELS.length; attempt++) {
-    try {
-      return await ai.models.generateContent({
-        model: VISION_MODELS[attempt],
-        contents: [
-          {
-            role: "user",
-            parts: [
-              { inlineData: { mimeType, data: imageBase64 } },
-              { text: prompt },
-            ],
-          },
-        ],
-        config: { systemInstruction },
-      });
-    } catch (err) {
-      lastError = err;
-      const status = (err as { status?: number })?.status;
-      if (status !== 503 && status !== 429) throw err;
-      if (attempt < VISION_MODELS.length - 1) {
-        await new Promise((r) => setTimeout(r, 800 * (attempt + 1)));
+  for (const keyIndex of nextKeyOrder()) {
+    const ai = clients[keyIndex];
+    for (let attempt = 0; attempt < VISION_MODELS.length; attempt++) {
+      try {
+        return await ai.models.generateContent({
+          model: VISION_MODELS[attempt],
+          contents: [
+            {
+              role: "user",
+              parts: [
+                { inlineData: { mimeType, data: imageBase64 } },
+                { text: prompt },
+              ],
+            },
+          ],
+          config: { systemInstruction },
+        });
+      } catch (err) {
+        lastError = err;
+        const status = (err as { status?: number })?.status;
+        if (status !== 503 && status !== 429) throw err;
+        if (attempt < VISION_MODELS.length - 1) {
+          await new Promise((r) => setTimeout(r, 800 * (attempt + 1)));
+        }
       }
     }
   }
+
+  // Every Gemini key/model combination failed — try other vision-capable
+  // providers before giving up. Each is a no-op if its key isn't set.
+  for (const fallback of [generateVisionWithOpenAI, generateVisionWithAnthropic]) {
+    try {
+      return await fallback(imageBase64, mimeType, prompt, systemInstruction);
+    } catch (err) {
+      lastError = err;
+    }
+  }
+
   throw lastError;
 }
 
