@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { generateWithRetry, geminiErrorMessage } from "@/lib/gemini";
-import { checkRateLimit, rateLimitMessage } from "@/lib/rate-limit";
+import { checkRateLimit, rateLimitMessage, recordUsage } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   try {
@@ -48,6 +48,9 @@ Break the plan into days, allocate time per subject/topic each day, and include 
     );
 
     const content = result.text ?? "Couldn't generate a plan — try again.";
+
+    await recordUsage(supabase, user.id, "study-plan-generate");
+
     const title = `${subjects.slice(0, 40)} study plan`;
 
     const { data: plan, error: dbError } = await supabase

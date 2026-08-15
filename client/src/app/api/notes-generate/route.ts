@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { generateWithRetry, geminiErrorMessage } from "@/lib/gemini";
-import { checkRateLimit, rateLimitMessage } from "@/lib/rate-limit";
+import { checkRateLimit, rateLimitMessage, recordUsage } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   try {
@@ -38,6 +38,8 @@ export async function POST(request: Request) {
     );
 
     const content = result.text ?? "Couldn't generate notes — try again.";
+
+    await recordUsage(supabase, user.id, "notes-generate");
 
     const { data: note, error: dbError } = await supabase
       .from("notes")

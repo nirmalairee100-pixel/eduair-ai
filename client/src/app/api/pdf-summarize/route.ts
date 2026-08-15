@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { generateWithRetry, geminiErrorMessage } from "@/lib/gemini";
-import { checkRateLimit, rateLimitMessage } from "@/lib/rate-limit";
+import { checkRateLimit, rateLimitMessage, recordUsage } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   try {
@@ -48,6 +48,8 @@ export async function POST(request: Request) {
     );
 
     const summary = result.text ?? "Couldn't generate a summary — try again.";
+
+    await recordUsage(supabase, user.id, "pdf-summarize");
 
     const { data: doc, error: dbError } = await supabase
       .from("documents")

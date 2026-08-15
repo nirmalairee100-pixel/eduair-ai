@@ -82,8 +82,12 @@ export async function generateWithRetry(
       } catch (err) {
         lastError = err;
         const status = (err as { status?: number })?.status;
-        // Only retry on transient server-side errors, not on bad requests/auth.
-        if (status !== 503 && status !== 429) throw err;
+        // Only retry within this key/model loop on transient server-side
+        // errors. Non-retryable errors (bad request, revoked key, etc.)
+        // stop the retry loop for this key but still fall through to the
+        // other Gemini keys and, eventually, the other providers below -
+        // they shouldn't take down the whole request.
+        if (status !== 503 && status !== 429) break;
         if (attempt < MODELS.length - 1) {
           await new Promise((r) => setTimeout(r, 800 * (attempt + 1)));
         }
@@ -136,7 +140,10 @@ export async function generateVisionWithRetry(
       } catch (err) {
         lastError = err;
         const status = (err as { status?: number })?.status;
-        if (status !== 503 && status !== 429) throw err;
+        // See the comment in generateWithRetry - break (not throw) so a
+        // non-retryable error on one key still lets other keys and the
+        // other providers get a chance.
+        if (status !== 503 && status !== 429) break;
         if (attempt < VISION_MODELS.length - 1) {
           await new Promise((r) => setTimeout(r, 800 * (attempt + 1)));
         }

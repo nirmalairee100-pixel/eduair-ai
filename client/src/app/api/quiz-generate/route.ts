@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { generateWithRetry, geminiErrorMessage } from "@/lib/gemini";
-import { checkRateLimit, rateLimitMessage } from "@/lib/rate-limit";
+import { checkRateLimit, rateLimitMessage, recordUsage } from "@/lib/rate-limit";
 
 type QuizQuestion = {
   question: string;
@@ -47,6 +47,11 @@ export async function POST(request: Request) {
 Each question must have exactly 4 options and correctIndex must be the 0-based index of the correct option. Write plain text only, no LaTeX or dollar-sign math notation.`,
       "application/json"
     );
+
+    // The Gemini call itself succeeded, so this counts against the daily
+    // limit even if the JSON below turns out malformed - that failure
+    // mode is separate from whether the AI call was made.
+    await recordUsage(supabase, user.id, "quiz-generate");
 
     const raw = result.text ?? "{}";
     let questions: QuizQuestion[];

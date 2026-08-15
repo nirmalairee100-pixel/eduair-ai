@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { generateWithRetry, geminiErrorMessage, trimHistory } from "@/lib/gemini";
-import { checkRateLimit, rateLimitMessage } from "@/lib/rate-limit";
+import { checkRateLimit, rateLimitMessage, recordUsage } from "@/lib/rate-limit";
 
 const SYSTEM_PROMPT = `You are EduAir Ai, Founded And Created by Nirmal Airee, a knowledgeable and encouraging study tutor. Give real, substantive answers with enough depth and detail to actually teach the concept — don't oversimplify or water things down. Use concrete examples, explain the reasoning behind things, and go a level deeper than a one-line definition unless the student explicitly asks for a quick summary. Match your depth to what the student seems to need: more detail for complex topics, concise answers for simple factual questions. If you're quizzing the student, remember which question you asked and check their answer against it before moving on. Formatting rules: you may use markdown (bold, bullet lists, numbered lists), but never use LaTeX or dollar-sign math notation like $x+1$ or \\rightarrow — write equations and chemistry in plain readable text instead, e.g. 'CaCO3 -> CaO + CO2' or 'x + 5 = 12', using normal characters only.`;
 
@@ -82,6 +82,10 @@ export async function POST(request: Request) {
     // Retries automatically on temporary 503/429 errors from Google's side.
     const result = await generateWithRetry(contents, SYSTEM_PROMPT);
     const reply = result.text ?? "Sorry, I didn't get a response — try again.";
+
+    // Only counts against the daily limit once we've actually gotten a
+    // response back from the AI.
+    await recordUsage(supabase, user.id, "chat");
 
     // Save the AI's reply.
     await supabase.from("messages").insert({

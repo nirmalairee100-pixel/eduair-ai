@@ -18,6 +18,9 @@ const DAILY_LIMITS: Record<string, number> = {
 
 const DEFAULT_LIMIT = 10;
 
+// Read-only check — does NOT log usage. Call this before doing any
+// paid work (e.g. calling Gemini) so a request that never actually
+// runs the AI call doesn't cost the user any quota.
 export async function checkRateLimit(
   supabase: SupabaseClient,
   userId: string,
@@ -45,11 +48,23 @@ export async function checkRateLimit(
     return { allowed: false, remaining: 0, limit };
   }
 
-  // Record this request. Not awaited-critical — if it fails we still
-  // let the request through, we just won't count it accurately.
-  await supabase.from("usage_log").insert({ user_id: userId, route });
-
   return { allowed: true, remaining: limit - used - 1, limit };
+}
+
+// Logs a request against the user's quota. Call this only AFTER the
+// AI call has actually succeeded — if generation fails (even after
+// retries/fallbacks), the user shouldn't be charged for it. Not
+// awaited-critical on failure - if the insert itself fails we still
+// let the response through, we just won't count it accurately.
+export async function recordUsage(
+  supabase: SupabaseClient,
+  userId: string,
+  route: string
+): Promise<void> {
+  const { error } = await supabase.from("usage_log").insert({ user_id: userId, route });
+  if (error) {
+    console.error("Failed to record usage:", error);
+  }
 }
 
 export function rateLimitMessage(route: string): string {

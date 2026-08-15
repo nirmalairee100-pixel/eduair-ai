@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { generateVisionWithRetry, geminiErrorMessage } from "@/lib/gemini";
-import { checkRateLimit, rateLimitMessage } from "@/lib/rate-limit";
+import { checkRateLimit, rateLimitMessage, recordUsage } from "@/lib/rate-limit";
 
 const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp", "image/heic"];
 // Base64 grows an image by ~33% — cap the encoded string so a huge
@@ -57,6 +57,8 @@ export async function POST(request: Request) {
     );
 
     const analysis = result.text ?? "Couldn't analyze that image — try again.";
+
+    await recordUsage(supabase, user.id, "photo-analyze");
 
     const { data: photo, error: dbError } = await supabase
       .from("photo_analyses")
