@@ -51,6 +51,15 @@ export default function PdfSummarizerPage() {
       const arrayBuffer = await file.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
 
+      const FREE_PAGE_LIMIT = 10;
+      if (pdf.numPages > FREE_PAGE_LIMIT) {
+        setExtracting(false);
+        setError(
+          `Free tier supports PDFs up to ${FREE_PAGE_LIMIT} pages. This one has ${pdf.numPages} — upgrade to Pro for up to 50 pages.`
+        );
+        return;
+      }
+
       let fullText = "";
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
@@ -73,7 +82,11 @@ export default function PdfSummarizerPage() {
       const res = await fetch("/api/pdf-summarize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fileName: file.name, text: fullText }),
+        body: JSON.stringify({
+          fileName: file.name,
+          text: fullText,
+          pageCount: pdf.numPages,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Something went wrong");

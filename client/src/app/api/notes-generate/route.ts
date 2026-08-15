@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { generateWithRetry, geminiErrorMessage } from "@/lib/gemini";
-import { checkRateLimit, RATE_LIMIT_MESSAGE } from "@/lib/rate-limit";
+import { checkRateLimit, rateLimitMessage } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   try {
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
 
     const { allowed } = await checkRateLimit(supabase, user.id, "notes-generate");
     if (!allowed) {
-      return NextResponse.json({ error: RATE_LIMIT_MESSAGE }, { status: 429 });
+      return NextResponse.json({ error: rateLimitMessage("notes-generate") }, { status: 429 });
     }
 
     const result = await generateWithRetry(

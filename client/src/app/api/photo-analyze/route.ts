@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { generateVisionWithRetry, geminiErrorMessage } from "@/lib/gemini";
-import { checkRateLimit, RATE_LIMIT_MESSAGE } from "@/lib/rate-limit";
+import { checkRateLimit, rateLimitMessage } from "@/lib/rate-limit";
 
 const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp", "image/heic"];
 // Base64 grows an image by ~33% — cap the encoded string so a huge
@@ -41,7 +41,7 @@ export async function POST(request: Request) {
 
     const { allowed } = await checkRateLimit(supabase, user.id, "photo-analyze");
     if (!allowed) {
-      return NextResponse.json({ error: RATE_LIMIT_MESSAGE }, { status: 429 });
+      return NextResponse.json({ error: rateLimitMessage("photo-analyze") }, { status: 429 });
     }
 
     const userQuestion =

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { generateWithRetry, geminiErrorMessage } from "@/lib/gemini";
-import { checkRateLimit, RATE_LIMIT_MESSAGE } from "@/lib/rate-limit";
+import { checkRateLimit, rateLimitMessage } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   try {
@@ -14,7 +14,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Not signed in" }, { status: 401 });
     }
 
-    const { fileName, text } = await request.json();
+    const { fileName, text, pageCount } = await request.json();
 
     if (!text || typeof text !== "string") {
       return NextResponse.json(
@@ -23,9 +23,19 @@ export async function POST(request: Request) {
       );
     }
 
+    const FREE_PAGE_LIMIT = 10;
+    if (typeof pageCount === "number" && pageCount > FREE_PAGE_LIMIT) {
+      return NextResponse.json(
+        {
+          error: `Free tier supports PDFs up to ${FREE_PAGE_LIMIT} pages. This one has ${pageCount} — upgrade to Pro for up to 50 pages.`,
+        },
+        { status: 413 }
+      );
+    }
+
     const { allowed } = await checkRateLimit(supabase, user.id, "pdf-summarize");
     if (!allowed) {
-      return NextResponse.json({ error: RATE_LIMIT_MESSAGE }, { status: 429 });
+      return NextResponse.json({ error: rateLimitMessage("pdf-summarize") }, { status: 429 });
     }
 
     // Cap input length so a huge PDF doesn't blow past the model's context

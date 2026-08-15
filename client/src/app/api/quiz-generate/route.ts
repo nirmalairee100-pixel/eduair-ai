@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { generateWithRetry, geminiErrorMessage } from "@/lib/gemini";
-import { checkRateLimit, RATE_LIMIT_MESSAGE } from "@/lib/rate-limit";
+import { checkRateLimit, rateLimitMessage } from "@/lib/rate-limit";
 
 type QuizQuestion = {
   question: string;
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
 
     const { allowed } = await checkRateLimit(supabase, user.id, "quiz-generate");
     if (!allowed) {
-      return NextResponse.json({ error: RATE_LIMIT_MESSAGE }, { status: 429 });
+      return NextResponse.json({ error: rateLimitMessage("quiz-generate") }, { status: 429 });
     }
 
     const count = Math.min(Math.max(Number(numQuestions) || 5, 3), 10);
