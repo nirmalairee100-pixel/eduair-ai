@@ -1,9 +1,9 @@
 import { GoogleGenAI } from "@google/genai";
 import {
-  generateWithOpenAI,
-  generateWithAnthropic,
-  generateVisionWithOpenAI,
-  generateVisionWithAnthropic,
+  generateWithGroq,
+  generateWithOpenRouter,
+  generateVisionWithGroq,
+  generateVisionWithOpenRouter,
 } from "@/lib/ai-fallback-providers";
 
 // Supports multiple Gemini API keys (e.g. from different Google
@@ -94,7 +94,7 @@ export async function generateWithRetry(
   // Every Gemini key/model combination failed (or is overloaded) — try
   // other providers before giving up entirely. Each is a no-op if its
   // key isn't set.
-  for (const fallback of [generateWithOpenAI, generateWithAnthropic]) {
+  for (const fallback of [generateWithGroq, generateWithOpenRouter]) {
     try {
       return await fallback(contents, systemInstruction, responseMimeType);
     } catch (err) {
@@ -146,7 +146,7 @@ export async function generateVisionWithRetry(
 
   // Every Gemini key/model combination failed — try other vision-capable
   // providers before giving up. Each is a no-op if its key isn't set.
-  for (const fallback of [generateVisionWithOpenAI, generateVisionWithAnthropic]) {
+  for (const fallback of [generateVisionWithGroq, generateVisionWithOpenRouter]) {
     try {
       return await fallback(imageBase64, mimeType, prompt, systemInstruction);
     } catch (err) {
