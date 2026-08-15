@@ -135,8 +135,13 @@ body, main, .flex-1, [class*="bg-white"], [class*="bg-slate-50"] {
   color: #f1f5f9 !important;
 }
 
-/* Convert all text elements to consistent visibility scales */
-p, span, h1, h2, h3, label {
+/* Convert all text elements to consistent visibility scales,
+   but don't touch elements that carry an explicit semantic color
+   (error/success/warning text, links, etc.) - those already pick
+   readable colors on their own and shouldn't be flattened to white. */
+p:not([class*="text-red-"]):not([class*="text-green-"]):not([class*="text-amber-"]):not([class*="text-emerald-"]):not([class*="text-indigo-"]),
+span:not([class*="text-red-"]):not([class*="text-green-"]):not([class*="text-amber-"]):not([class*="text-emerald-"]):not([class*="text-indigo-"]),
+h1, h2, h3, label {
   color: #f1f5f9 !important;
 }
 
@@ -147,4 +152,27 @@ p, span, h1, h2, h3, label {
 /* Soften all structural card boundaries globally */
 div[class*="border-slate-"] {
   border-color: #0f172a !important;
+}
+
+/* Error/status banners (bg-red-50, bg-green-50, etc.) keep their own
+   light background even inside the forced-dark page, so force a dark
+   readable text color on them instead of white-on-white-ish. */
+[class*="bg-red-50"] { color: #b91c1c !important; }
+[class*="bg-green-50"] { color: #15803d !important; }
+[class*="bg-amber-50"] { color: #b45309 !important; }
+
+/* AI output rendered via the Typography plugin (prose) is styled for
+   a light card background. Since cards are forced dark above, flip
+   the whole block to light text so headings, bullets, bold text,
+   and inline code stay readable instead of dark-gray-on-black. */
+.prose {
+  --tw-prose-body: #e2e8f0;
+  --tw-prose-headings: #f8fafc;
+  --tw-prose-bold: #f8fafc;
+  --tw-prose-bullets: #64748b;
+  --tw-prose-counters: #94a3b8;
+  --tw-prose-links: #818cf8;
+  --tw-prose-code: #f1f5f9;
+  --tw-prose-quotes: #cbd5e1;
+  --tw-prose-quote-borders: #334155;
 }
