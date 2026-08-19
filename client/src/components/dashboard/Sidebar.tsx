@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -13,6 +14,8 @@ import {
   Camera,
   LogOut,
   Crown,
+  Menu,
+  X,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -50,6 +53,13 @@ export default function Sidebar({
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
+  const [isOpen, setIsOpen] = useState(false);
+
+  // Close the drawer automatically whenever the route changes
+  // (tapping a nav link on mobile shouldn't leave the drawer open).
+  useEffect(() => {
+    setIsOpen(false);
+  }, [pathname]);
 
   async function logout() {
     await supabase.auth.signOut();
@@ -58,20 +68,66 @@ export default function Sidebar({
   }
 
   return (
-    <aside className="flex h-screen w-64 shrink-0 flex-col border-r border-slate-900/60 bg-[#030712]/10 backdrop-blur-xl select-none">
-      
-      {/* BRAND SYSTEM EMBLEM */}
-      <div className="flex items-center gap-2.5 px-6 py-6 cursor-pointer" onClick={() => router.push("/dashboard")}>
-        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-600 to-indigo-700 text-white font-black text-xs shadow-md border border-indigo-500/20">
-          E
+    <>
+      {/* MOBILE TOP BAR — hamburger trigger, hidden on desktop */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-4 h-14 border-b border-slate-900/60 bg-[#030712]/80 backdrop-blur-xl">
+        <div className="flex items-center gap-2.5" onClick={() => router.push("/dashboard")}>
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-600 to-indigo-700 text-white font-black text-xs shadow-md border border-indigo-500/20">
+            E
+          </div>
+          <span className="text-sm font-bold tracking-tight text-white">
+            EduAir<span className="text-indigo-400">.ai</span>
+          </span>
         </div>
-        <span className="text-sm font-bold tracking-tight text-white">
-          EduAir<span className="text-indigo-400">.ai</span>
-        </span>
+        <button
+          onClick={() => setIsOpen(true)}
+          aria-label="Open menu"
+          className="rounded-lg p-2 text-slate-400 hover:bg-slate-900/60 hover:text-white transition-colors"
+        >
+          <Menu size={18} />
+        </button>
       </div>
 
+      {/* BACKDROP — only shown on mobile while the drawer is open */}
+      {isOpen && (
+        <div
+          className="md:hidden fixed inset-0 z-30 bg-black/60 backdrop-blur-sm"
+          onClick={() => setIsOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      <aside
+        className={`fixed md:relative top-0 left-0 z-40 flex h-screen w-72 max-w-[85vw] md:w-64 md:max-w-none shrink-0 flex-col border-r border-slate-900/60 bg-[#030712] md:bg-[#030712]/10 backdrop-blur-xl select-none transition-transform duration-300 ease-out ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        } md:translate-x-0`}
+      >
+        {/* BRAND SYSTEM EMBLEM — desktop only, mobile has its own top bar */}
+        <div className="hidden md:flex items-center gap-2.5 px-6 py-6 cursor-pointer" onClick={() => router.push("/dashboard")}>
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-600 to-indigo-700 text-white font-black text-xs shadow-md border border-indigo-500/20">
+            E
+          </div>
+          <span className="text-sm font-bold tracking-tight text-white">
+            EduAir<span className="text-indigo-400">.ai</span>
+          </span>
+        </div>
+
+        {/* MOBILE DRAWER HEADER — close button */}
+        <div className="md:hidden flex items-center justify-between px-4 h-14 border-b border-slate-900/60">
+          <span className="text-sm font-bold tracking-tight text-white">
+            EduAir<span className="text-indigo-400">.ai</span>
+          </span>
+          <button
+            onClick={() => setIsOpen(false)}
+            aria-label="Close menu"
+            className="rounded-lg p-2 text-slate-400 hover:bg-slate-900/60 hover:text-white transition-colors"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
       {/* ACTION INDEX ROUTING ITEMS */}
-      <nav className="flex-1 space-y-0.5 px-3 overflow-y-auto custom-scrollbar">
+      <nav className="flex-1 space-y-0.5 px-3 pt-3 overflow-y-auto custom-scrollbar">
         {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
           const active =
             href === "/dashboard"
@@ -157,6 +213,7 @@ export default function Sidebar({
           </button>
         </div>
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }
