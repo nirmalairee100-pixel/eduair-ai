@@ -6,6 +6,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  --breakpoint-xs: 22.5rem;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
@@ -175,4 +176,13 @@ div[class*="border-slate-"] {
   --tw-prose-code: #f1f5f9;
   --tw-prose-quotes: #cbd5e1;
   --tw-prose-quote-borders: #334155;
+}
+/* Hide scrollbar for horizontally-scrollable mobile tab strips while
+   keeping them scrollable (used on the landing page simulator tabs). */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
