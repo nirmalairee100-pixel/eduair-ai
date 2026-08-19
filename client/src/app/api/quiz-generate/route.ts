@@ -1,13 +1,29 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { generateWithRetry, geminiErrorMessage } from "@/lib/gemini";
-import { checkRateLimit, rateLimitMessage, recordUsage } from "@/lib/rate-limit";
+import { checkRateLimit, rateLimitMessage } from "@/lib/rate-limit";
 
 type QuizQuestion = {
   question: string;
   options: string[];
   correctIndex: number;
 };
+
+// Fisher-Yates shuffle of a question's options, remapping correctIndex
+// to track the correct answer's new position.
+function shuffleOptions(q: QuizQuestion): QuizQuestion {
+  const correctOption = q.options[q.correctIndex];
+  const shuffled = [...q.options];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return {
+    ...q,
+    options: shuffled,
+    correctIndex: shuffled.indexOf(correctOption),
+  };
+}
 
 export async function POST(request: Request) {
   try {
@@ -48,11 +64,6 @@ Each question must have exactly 4 options and correctIndex must be the 0-based i
       "application/json"
     );
 
-    // The Gemini call itself succeeded, so this counts against the daily
-    // limit even if the JSON below turns out malformed - that failure
-    // mode is separate from whether the AI call was made.
-    await recordUsage(supabase, user.id, "quiz-generate");
-
     const raw = result.text ?? "{}";
     let questions: QuizQuestion[];
     try {
@@ -67,6 +78,13 @@ Each question must have exactly 4 options and correctIndex must be the 0-based i
         { status: 500 }
       );
     }
+
+    // Gemini tends to place the correct option in the same spot (usually
+    // index 0) far more often than chance would — a known LLM quiz-gen
+    // bias, not a real signal. Shuffle each question's options so the
+    // correct answer lands in a random position, and remap correctIndex
+    // to match the new order.
+    questions = questions.map((q) => shuffleOptions(q));
 
     const { data: quiz, error: dbError } = await supabase
       .from("quizzes")
