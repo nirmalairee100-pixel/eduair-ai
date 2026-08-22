@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { generateWithRetry, geminiErrorMessage } from "@/lib/gemini";
-import { checkRateLimit, rateLimitMessage, recordUsage } from "@/lib/rate-limit";
+import { checkRateLimit, recordUsage, rateLimitMessage } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   try {
@@ -33,9 +33,9 @@ export async function POST(request: Request) {
       );
     }
 
-    const { allowed } = await checkRateLimit(supabase, user.id, "pdf-summarize");
+    const { allowed, isPro } = await checkRateLimit(supabase, user.id, "pdf-summarize");
     if (!allowed) {
-      return NextResponse.json({ error: rateLimitMessage("pdf-summarize") }, { status: 429 });
+      return NextResponse.json({ error: rateLimitMessage("pdf-summarize", isPro) }, { status: 429 });
     }
 
     // Cap input length so a huge PDF doesn't blow past the model's context
@@ -49,8 +49,6 @@ export async function POST(request: Request) {
 
     const summary = result.text ?? "Couldn't generate a summary — try again.";
 
-    await recordUsage(supabase, user.id, "pdf-summarize");
-
     const { data: doc, error: dbError } = await supabase
       .from("documents")
       .insert({
@@ -62,6 +60,8 @@ export async function POST(request: Request) {
       .single();
 
     if (dbError) throw dbError;
+
+    await recordUsage(supabase, user.id, "pdf-summarize");
 
     return NextResponse.json({ summary, documentId: doc.id });
   } catch (err) {

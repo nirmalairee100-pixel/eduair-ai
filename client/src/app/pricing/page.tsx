@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { Check } from "lucide-react";
 
+const WHATSAPP_NUMBER = "9779868748003";
+const ESEWA_ID = "9709451225";
+
 const PLANS = [
   {
     name: "Free",
@@ -25,14 +28,14 @@ const PLANS = [
     tagline: "For students studying seriously for exams.",
     features: [
       "Everything in Free",
-      "Unlimited quizzes & notes",
+      "Generous quiz & notes limits",
       "PDF summarizer (up to ~50 pages)",
-      "Unlimited photo analyzer",
+      "Higher photo analyzer limits",
       "Full study planner",
       "Priority AI response speed",
     ],
-    cta: "Coming soon",
-    href: "/contact",
+    cta: "Get Pro — Rs 499/mo",
+    href: "#upgrade",
     highlighted: true,
   },
   {
@@ -54,6 +57,10 @@ const PLANS = [
 ];
 
 export default function PricingPage() {
+  const whatsappLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+    "Hi! I just paid for EduAir Pro. Here's my payment screenshot and the email I use to log in:"
+  )}`;
+
   return (
     <main className="min-h-screen bg-gray-50 px-6 py-16">
       <div className="mx-auto max-w-5xl text-center">
@@ -112,9 +119,50 @@ export default function PricingPage() {
         ))}
       </div>
 
+      {/* Manual upgrade flow — no payment gateway integration yet, so Pro
+          is activated by hand after a direct eSewa/Khalti transfer. This
+          is intentional: don't build billing infra before you've proven
+          people will actually pay. Switch to automated checkout once
+          you've got a steady stream of these. */}
+      <div id="upgrade" className="mx-auto mt-16 max-w-2xl rounded-3xl border border-indigo-200 bg-indigo-50/50 p-8 text-left">
+        <h2 className="text-xl font-bold text-slate-900">How to get Pro</h2>
+        <ol className="mt-4 space-y-3 text-sm text-slate-700 list-decimal list-inside">
+          <li>
+            Send <span className="font-semibold">Rs 499</span> via eSewa to <span className="font-mono">{ESEWA_ID}</span>.
+          </li>
+          <li>
+            Message the payment screenshot + the email you use to log into EduAir on{" "}
+            <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="text-indigo-600 font-semibold hover:underline">
+              WhatsApp
+            </a>.
+          </li>
+          <li>Pro is activated on your account within a few hours (usually much faster).</li>
+        </ol>
+        <a
+          href={whatsappLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-6 inline-block rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 transition"
+        >
+          Message on WhatsApp
+        </a>
+        <p className="mt-4 text-xs text-slate-500">
+          Automated checkout is coming later — for now this keeps things simple and lets you talk to real early users.
+        </p>
+      </div>
+
       <p className="mx-auto mt-10 max-w-md text-center text-xs text-slate-400">
-        Paid plans are launching soon. Everyone gets full access to the Free tier today — no credit card required.
+        Everyone gets full access to the Free tier today — no credit card required.
       </p>
     </main>
   );
 }
+
+// === SETUP NOTE FOR NIRMAL ===
+// WHATSAPP_NUMBER and ESEWA_ID are filled in above.
+// Remember: ESEWA_ID currently points to a friend's eSewa account, not
+// your own — make sure you two have a clear agreement on how/when they
+// pass along what students send before this goes live.
+// Also run supabase-migrations/add_pro_plan.sql in the Supabase SQL editor
+// before this goes live, and use the manual-activation query at the bottom
+// of that file each time someone pays.

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { generateWithRetry, geminiErrorMessage, trimHistory } from "@/lib/gemini";
-import { checkRateLimit, rateLimitMessage, recordUsage } from "@/lib/rate-limit";
+import { checkRateLimit, recordUsage, rateLimitMessage } from "@/lib/rate-limit";
 
 const SYSTEM_PROMPT = `You are EduAir Ai, Founded And Created by Nirmal Airee, a knowledgeable and encouraging study tutor. Give real, substantive answers with enough depth and detail to actually teach the concept — don't oversimplify or water things down. Use concrete examples, explain the reasoning behind things, and go a level deeper than a one-line definition unless the student explicitly asks for a quick summary. Match your depth to what the student seems to need: more detail for complex topics, concise answers for simple factual questions. If you're quizzing the student, remember which question you asked and check their answer against it before moving on. Formatting rules: you may use markdown (bold, bullet lists, numbered lists), but never use LaTeX or dollar-sign math notation like $x+1$ or \\rightarrow — write equations and chemistry in plain readable text instead, e.g. 'CaCO3 -> CaO + CO2' or 'x + 5 = 12', using normal characters only.`;
 
@@ -34,9 +34,9 @@ export async function POST(request: Request) {
       );
     }
 
-    const { allowed } = await checkRateLimit(supabase, user.id, "chat");
+    const { allowed, isPro } = await checkRateLimit(supabase, user.id, "chat");
     if (!allowed) {
-      return NextResponse.json({ error: rateLimitMessage("chat") }, { status: 429 });
+      return NextResponse.json({ error: rateLimitMessage("chat", isPro) }, { status: 429 });
     }
 
     // Get or create the conversation this message belongs to.
@@ -83,16 +83,15 @@ export async function POST(request: Request) {
     const result = await generateWithRetry(contents, SYSTEM_PROMPT);
     const reply = result.text ?? "Sorry, I didn't get a response — try again.";
 
-    // Only counts against the daily limit once we've actually gotten a
-    // response back from the AI.
-    await recordUsage(supabase, user.id, "chat");
-
     // Save the AI's reply.
     await supabase.from("messages").insert({
       conversation_id: convoId,
       role: "assistant",
       content: reply,
     });
+
+    // Only counts against quota now that we know the request succeeded.
+    await recordUsage(supabase, user.id, "chat");
 
     return NextResponse.json({ reply, conversationId: convoId });
   } catch (err) {

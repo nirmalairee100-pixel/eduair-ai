@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { generateWithRetry, geminiErrorMessage } from "@/lib/gemini";
-import { checkRateLimit, rateLimitMessage, recordUsage } from "@/lib/rate-limit";
+import { checkRateLimit, recordUsage, rateLimitMessage } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   try {
@@ -27,9 +27,9 @@ export async function POST(request: Request) {
       );
     }
 
-    const { allowed } = await checkRateLimit(supabase, user.id, "notes-generate");
+    const { allowed, isPro } = await checkRateLimit(supabase, user.id, "notes-generate");
     if (!allowed) {
-      return NextResponse.json({ error: rateLimitMessage("notes-generate") }, { status: 429 });
+      return NextResponse.json({ error: rateLimitMessage("notes-generate", isPro) }, { status: 429 });
     }
 
     const result = await generateWithRetry(
@@ -39,8 +39,6 @@ export async function POST(request: Request) {
 
     const content = result.text ?? "Couldn't generate notes — try again.";
 
-    await recordUsage(supabase, user.id, "notes-generate");
-
     const { data: note, error: dbError } = await supabase
       .from("notes")
       .insert({ user_id: user.id, topic, content })
@@ -48,6 +46,8 @@ export async function POST(request: Request) {
       .single();
 
     if (dbError) throw dbError;
+
+    await recordUsage(supabase, user.id, "notes-generate");
 
     return NextResponse.json({ content, noteId: note.id });
   } catch (err) {

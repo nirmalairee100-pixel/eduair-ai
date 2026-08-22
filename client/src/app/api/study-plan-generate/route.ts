@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { generateWithRetry, geminiErrorMessage } from "@/lib/gemini";
-import { checkRateLimit, rateLimitMessage, recordUsage } from "@/lib/rate-limit";
+import { checkRateLimit, recordUsage, rateLimitMessage } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   try {
@@ -30,9 +30,9 @@ export async function POST(request: Request) {
       );
     }
 
-    const { allowed } = await checkRateLimit(supabase, user.id, "study-plan-generate");
+    const { allowed, isPro } = await checkRateLimit(supabase, user.id, "study-plan-generate");
     if (!allowed) {
-      return NextResponse.json({ error: rateLimitMessage("study-plan-generate") }, { status: 429 });
+      return NextResponse.json({ error: rateLimitMessage("study-plan-generate", isPro) }, { status: 429 });
     }
 
     const prompt = `Create a day-by-day study plan.
@@ -48,9 +48,6 @@ Break the plan into days, allocate time per subject/topic each day, and include 
     );
 
     const content = result.text ?? "Couldn't generate a plan — try again.";
-
-    await recordUsage(supabase, user.id, "study-plan-generate");
-
     const title = `${subjects.slice(0, 40)} study plan`;
 
     const { data: plan, error: dbError } = await supabase
@@ -60,6 +57,8 @@ Break the plan into days, allocate time per subject/topic each day, and include 
       .single();
 
     if (dbError) throw dbError;
+
+    await recordUsage(supabase, user.id, "study-plan-generate");
 
     return NextResponse.json({ content, title, planId: plan.id });
   } catch (err) {
