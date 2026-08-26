@@ -90,7 +90,7 @@ const tabPanelVariants = {
 const markingRows = [
   {
     q: "Q1",
-    prompt: "Don&apos;t understand a concept?",
+    prompt: "Don't understand a concept?",
     answer:
       "Air, your AI tutor, explains it in plain language and maps every answer back to your actual NEB or SEE syllabus — not a generic textbook.",
   },
@@ -102,7 +102,7 @@ const markingRows = [
   },
   {
     q: "Q3",
-    prompt: "Don&apos;t know what you don&apos;t know?",
+    prompt: "Don't know what you don't know?",
     answer:
       "The Quiz Engine builds a test from your own chapters and shows you the gaps before your teacher does.",
   },
