@@ -15,6 +15,7 @@ import {
   Crown,
   ClipboardCheck,
   TrendingDown,
+  Gift,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -34,6 +35,7 @@ const NAV_ITEMS = [
   { href: "/dashboard/notes", label: "Notes Maker", icon: NotebookPen },
   { href: "/dashboard/library", label: "My Library", icon: Library },
   { href: "/dashboard/planner", label: "Study Planner", icon: CalendarDays },
+  { href: "/dashboard/referrals", label: "Refer a Friend", icon: Gift },
 ];
 
 interface SidebarProps {
