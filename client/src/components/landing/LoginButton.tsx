@@ -13,10 +13,19 @@ export default function LoginButton({
 }) {
   const login = async () => {
     const supabase = createClient();
+
+    // Carry a referral code through the OAuth round-trip, if present
+    // (e.g. someone arrived via eduair-ai.vercel.app/login?ref=ABC123).
+    const ref = new URLSearchParams(window.location.search).get("ref");
+
+    const callbackUrl = new URL(`${window.location.origin}/auth/callback`);
+    callbackUrl.searchParams.set("next", "/dashboard");
+    if (ref) callbackUrl.searchParams.set("ref", ref);
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+        redirectTo: callbackUrl.toString(),
       },
     });
 

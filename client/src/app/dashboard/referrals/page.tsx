@@ -29,7 +29,7 @@ export default function ReferralsPage() {
     load();
   }, []);
 
-  const shareLink = code ? `https://eduair-ai.vercel.app/signup?ref=${code}` : "";
+  const shareLink = code ? `https://eduair-ai.vercel.app/login?ref=${code}` : "";
 
   async function handleCopy() {
     await navigator.clipboard.writeText(shareLink);
