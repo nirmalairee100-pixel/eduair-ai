@@ -7,6 +7,7 @@ import { apiFetch } from "@/lib/apiFetch";
 export default function ReferralsPage() {
   const [loading, setLoading] = useState(true);
   const [code, setCode] = useState<string | null>(null);
+  const [referralCount, setReferralCount] = useState(0);
   const [copied, setCopied] = useState(false);
   const [redeemCode, setRedeemCode] = useState("");
   const [redeemStatus, setRedeemStatus] = useState<string | null>(null);
@@ -17,7 +18,10 @@ export default function ReferralsPage() {
       try {
         const res = await apiFetch("/api/referral/code");
         const json = await res.json();
-        if (res.ok) setCode(json.code);
+        if (res.ok) {
+          setCode(json.code);
+          setReferralCount(json.referralCount ?? 0);
+        }
       } finally {
         setLoading(false);
       }
@@ -70,6 +74,10 @@ export default function ReferralsPage() {
       <p className="mt-1 text-sm text-slate-400">
         Share your link. When a friend signs up with it, you both get 7 days of Pro — free.
       </p>
+
+      <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-4 py-1.5 text-sm font-medium text-indigo-300">
+        {referralCount === 0 ? "No referrals yet — share your link!" : `You've referred ${referralCount} friend${referralCount === 1 ? "" : "s"}`}
+      </div>
 
       <div className="mt-6 rounded-xl border border-slate-800 bg-slate-950/40 p-4">
         <p className="text-xs uppercase tracking-wide text-slate-500">Your referral link</p>
