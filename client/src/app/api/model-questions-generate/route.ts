@@ -7,6 +7,7 @@ type MQQuestion = {
   number: string;      // e.g. "1", "2(a)"
   text: string;
   marks: number;
+  options?: string[];  // present only for MCQ/objective questions
 };
 
 type MQSection = {
@@ -75,6 +76,8 @@ Do not copy or paraphrase any specific real past paper's questions — write ent
 
 
 
+If a question is a multiple-choice / "tick the best alternative" style objective question (the norm for Class 10's Objective Questions section, and for some Class 8/12 objective sections), you MUST include an "options" array of exactly 4 plausible answer choices (one correct, three believable distractors — not obviously wrong). Do NOT write "Tick the best alternative" style instructions unless you are actually providing options for every question in that section. If a section instead asks for short written answers (define, state, write the formula, etc. with no options to tick), omit the "options" field entirely for those questions and don't claim it's a "tick the alternative" section.
+
 Respond with ONLY valid JSON, no markdown fences, no commentary, matching exactly this shape:
 {
   "fullMarks": 75,
@@ -83,9 +86,14 @@ Respond with ONLY valid JSON, no markdown fences, no commentary, matching exactl
   "sections": [
     {
       "group": "Objective Questions",
-      "instructions": "Answer all questions. Each question carries 1 mark. [1x11=11]",
+      "instructions": "Tick the best alternative for each question. [1x11=11]",
       "questions": [
-        { "number": "1", "text": "question text here", "marks": 1 }
+        {
+          "number": "1",
+          "text": "question text here",
+          "marks": 1,
+          "options": ["option A", "option B", "option C", "option D"]
+        }
       ]
     }
   ]

@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { Sparkles, Loader2, FileCheck2, RotateCcw } from "lucide-react";
 
-type MQQuestion = { number: string; text: string; marks: number };
+type MQQuestion = { number: string; text: string; marks: number; options?: string[] };
 type MQSection = { group: string; instructions: string; questions: MQQuestion[] };
 type MQResult = {
   setId: string;
@@ -233,7 +233,21 @@ export default function ModelQuestionsPage() {
                 {section.questions.map((q, qi) => (
                   <div key={qi} className="flex gap-3 text-sm text-slate-200">
                     <span className="shrink-0 font-mono text-slate-500">{q.number}.</span>
-                    <p className="flex-1">{q.text}</p>
+                    <div className="flex-1">
+                      <p>{q.text}</p>
+                      {q.options && q.options.length > 0 && (
+                        <div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+                          {q.options.map((opt, oi) => (
+                            <span
+                              key={oi}
+                              className="rounded-md border border-slate-800 bg-slate-900/60 px-2.5 py-1 text-xs text-slate-300"
+                            >
+                              {String.fromCharCode(97 + oi)}) {opt}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                     <span className="shrink-0 font-mono text-xs text-red-400/80">[{q.marks}]</span>
                   </div>
                 ))}
