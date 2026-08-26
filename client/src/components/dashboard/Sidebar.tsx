@@ -14,6 +14,7 @@ import {
   LogOut,
   Crown,
   ClipboardCheck,
+  TrendingDown,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -29,6 +30,7 @@ const NAV_ITEMS = [
   { href: "/dashboard/photo", label: "Photo Analyzer", icon: Camera },
   { href: "/dashboard/quiz", label: "Quiz Generator", icon: Sparkles },
   { href: "/dashboard/model-questions", label: "Model Questions", icon: ClipboardCheck },
+  { href: "/dashboard/weak-topics", label: "Weak Topics", icon: TrendingDown },
   { href: "/dashboard/notes", label: "Notes Maker", icon: NotebookPen },
   { href: "/dashboard/library", label: "My Library", icon: Library },
   { href: "/dashboard/planner", label: "Study Planner", icon: CalendarDays },

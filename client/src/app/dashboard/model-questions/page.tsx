@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { Sparkles, Loader2, FileCheck2, RotateCcw } from "lucide-react";
+import { apiFetch } from "@/lib/apiFetch";
 
 type MQQuestion = { number: string; text: string; marks: number; options?: string[] };
 type MQSection = { group: string; instructions: string; questions: MQQuestion[] };
@@ -14,6 +15,8 @@ type MQResult = {
   passMarks?: number;
   timeAllowed?: string;
   sections: MQSection[];
+  quotaRemaining?: number;
+  quotaLimit?: number;
 };
 
 const SUBJECTS: Record<string, string[]> = {
@@ -77,7 +80,7 @@ export default function ModelQuestionsPage() {
     setResult(null);
 
     try {
-      const res = await fetch("/api/model-questions-generate", {
+      const res = await apiFetch("/api/model-questions-generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -192,12 +195,19 @@ export default function ModelQuestionsPage() {
 
       {result && (
         <div className="mt-6 space-y-5">
-          <button
-            onClick={() => setResult(null)}
-            className="flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-slate-200"
-          >
-            <RotateCcw size={13} /> Generate another
-          </button>
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => setResult(null)}
+              className="flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-slate-200"
+            >
+              <RotateCcw size={13} /> Generate another
+            </button>
+            {typeof result.quotaRemaining === "number" && typeof result.quotaLimit === "number" && (
+              <span className="font-mono text-[11px] text-slate-500">
+                {result.quotaRemaining} of {result.quotaLimit} left today
+              </span>
+            )}
+          </div>
 
           {/* ADMIT-CARD STYLE PAPER HEADER */}
           <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-6 font-mono">

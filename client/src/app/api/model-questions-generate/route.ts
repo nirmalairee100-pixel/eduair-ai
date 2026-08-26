@@ -42,7 +42,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid subject" }, { status: 400 });
     }
 
-    const { allowed, isPro } = await checkRateLimit(supabase, user.id, "model-questions-generate");
+    const { allowed, isPro, remaining, limit } = await checkRateLimit(
+      supabase,
+      user.id,
+      "model-questions-generate"
+    );
     if (!allowed) {
       return NextResponse.json(
         { error: rateLimitMessage("model-questions-generate", isPro) },
@@ -151,6 +155,9 @@ Use realistic Nepali NEB conventions (e.g. "[5x2=10]" style marks notation in gr
       passMarks,
       timeAllowed,
       sections,
+      // remaining is pre-generation count; subtract 1 since this request just used one
+      quotaRemaining: Math.max(0, remaining - 1),
+      quotaLimit: limit,
     });
   } catch (err) {
     console.error("Model question generate error:", err);
