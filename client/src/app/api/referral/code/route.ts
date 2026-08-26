@@ -30,25 +30,30 @@ export async function GET() {
 
     if (error) throw error;
 
-    if (profile.referral_code) {
-      return NextResponse.json({ code: profile.referral_code });
-    }
+    let code = profile.referral_code;
 
-    // No code yet — generate one, retrying on the rare collision.
-    const admin = createAdminClient();
-    let code = generateCode();
-    for (let attempt = 0; attempt < 5; attempt++) {
-      const { error: updateError } = await admin
-        .from("profiles")
-        .update({ referral_code: code })
-        .eq("id", user.id)
-        .is("referral_code", null);
-
-      if (!updateError) break;
+    if (!code) {
+      // No code yet — generate one, retrying on the rare collision.
+      const admin = createAdminClient();
       code = generateCode();
+      for (let attempt = 0; attempt < 5; attempt++) {
+        const { error: updateError } = await admin
+          .from("profiles")
+          .update({ referral_code: code })
+          .eq("id", user.id)
+          .is("referral_code", null);
+
+        if (!updateError) break;
+        code = generateCode();
+      }
     }
 
-    return NextResponse.json({ code });
+    const { count: referralCount } = await supabase
+      .from("referral_redemptions")
+      .select("id", { count: "exact", head: true })
+      .eq("referrer_id", user.id);
+
+    return NextResponse.json({ code, referralCount: referralCount ?? 0 });
   } catch (err) {
     console.error("Referral code error:", err);
     return NextResponse.json({ error: "Failed to load referral code" }, { status: 500 });
