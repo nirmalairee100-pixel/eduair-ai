@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { generateWithRetry, geminiErrorMessage } from "@/lib/gemini";
-import { checkRateLimit, rateLimitMessage } from "@/lib/rate-limit";
+import { checkRateLimit, recordUsage, rateLimitMessage } from "@/lib/rate-limit";
 
 type MQQuestion = {
   number: string;      // e.g. "1", "2(a)"
@@ -96,7 +96,7 @@ Use realistic Nepali NEB conventions (e.g. "[5x2=10]" style marks notation in gr
         { status: 500 }
       );
     }
-
+await recordUsage(supabase, user.id, "model-questions-generate");
     const { data: set, error: dbError } = await supabase
       .from("model_question_sets")
       .insert({
