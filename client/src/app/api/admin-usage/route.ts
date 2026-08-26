@@ -23,12 +23,7 @@ export async function GET() {
     const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     const since7d = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
-    const [
-      { count: totalUsers },
-      { count: requests24h },
-      { data: routes7d },
-      { data: modelQuestionSets7d },
-    ] = await Promise.all([
+    const [usersRes, calls24hRes, routes7dRes, modelSetsRes] = await Promise.all([
       admin.from("profiles").select("id", { count: "exact", head: true }),
       admin
         .from("usage_log")
@@ -41,15 +36,23 @@ export async function GET() {
         .gte("created_at", since7d),
     ]);
 
-    const requests7d = routes7d?.length ?? 0;
+    if (usersRes.error) console.error("admin-usage: profiles count error:", usersRes.error);
+    if (calls24hRes.error) console.error("admin-usage: usage_log 24h count error:", calls24hRes.error);
+    if (routes7dRes.error) console.error("admin-usage: usage_log 7d select error:", routes7dRes.error);
+    if (modelSetsRes.error) console.error("admin-usage: model_question_sets error:", modelSetsRes.error);
+
+    const routes7d = routes7dRes.data ?? [];
+    const modelQuestionSets7d = modelSetsRes.data ?? [];
+
+    const requests7d = routes7d.length;
 
     const routeCounts7d: Record<string, number> = {};
-    for (const row of routes7d ?? []) {
+    for (const row of routes7d) {
       routeCounts7d[row.route] = (routeCounts7d[row.route] ?? 0) + 1;
     }
 
     const subjectCounts: Record<string, number> = {};
-    for (const row of modelQuestionSets7d ?? []) {
+    for (const row of modelQuestionSets7d) {
       if (row.subject) {
         subjectCounts[row.subject] = (subjectCounts[row.subject] ?? 0) + 1;
       }
@@ -59,11 +62,17 @@ export async function GET() {
     );
 
     return NextResponse.json({
-      requests24h: requests24h ?? 0,
+      requests24h: calls24hRes.count ?? 0,
       requests7d,
-      totalUsers: totalUsers ?? 0,
+      totalUsers: usersRes.count ?? 0,
       routeCounts7d,
       topModelQuestionSubjects,
+      _debug: {
+        usersError: usersRes.error?.message ?? null,
+        calls24hError: calls24hRes.error?.message ?? null,
+        routes7dError: routes7dRes.error?.message ?? null,
+        modelSetsError: modelSetsRes.error?.message ?? null,
+      },
     });
   } catch (err) {
     console.error("Admin usage error:", err);
