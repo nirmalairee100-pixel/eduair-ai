@@ -36,15 +36,13 @@ export async function GET() {
         .gte("created_at", since7d),
     ]);
 
-    if (usersRes.error) console.error("admin-usage: profiles count error:", usersRes.error);
-    if (calls24hRes.error) console.error("admin-usage: usage_log 24h count error:", calls24hRes.error);
-    if (routes7dRes.error) console.error("admin-usage: usage_log 7d select error:", routes7dRes.error);
+    if (usersRes.error) console.error("admin-usage: profiles error:", usersRes.error);
+    if (calls24hRes.error) console.error("admin-usage: usage_log 24h error:", calls24hRes.error);
+    if (routes7dRes.error) console.error("admin-usage: usage_log 7d error:", routes7dRes.error);
     if (modelSetsRes.error) console.error("admin-usage: model_question_sets error:", modelSetsRes.error);
 
     const routes7d = routes7dRes.data ?? [];
     const modelQuestionSets7d = modelSetsRes.data ?? [];
-
-    const requests7d = routes7d.length;
 
     const routeCounts7d: Record<string, number> = {};
     for (const row of routes7d) {
@@ -63,16 +61,10 @@ export async function GET() {
 
     return NextResponse.json({
       requests24h: calls24hRes.count ?? 0,
-      requests7d,
+      requests7d: routes7d.length,
       totalUsers: usersRes.count ?? 0,
       routeCounts7d,
       topModelQuestionSubjects,
-      _debug: {
-        usersError: usersRes.error?.message ?? null,
-        calls24hError: calls24hRes.error?.message ?? null,
-        routes7dError: routes7dRes.error?.message ?? null,
-        modelSetsError: modelSetsRes.error?.message ?? null,
-      },
     });
   } catch (err) {
     console.error("Admin usage error:", err);
