@@ -10,13 +10,22 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/pricing",
     "/schools",
     "/contact",
-    "/login",
+    "/privacy",
+    "/terms",
+    "/resources/class-10",
+    "/resources/see-preparation",
+    "/resources/study-tips",
   ];
 
   return routes.map((route) => ({
     url: `${BASE_URL}${route}`,
     lastModified: new Date(),
     changeFrequency: route === "" ? "weekly" : "monthly",
-    priority: route === "" ? 1 : 0.7,
+    priority:
+      route === ""
+        ? 1
+        : route.startsWith("/resources/")
+          ? 0.8
+          : 0.7,
   }));
 }
