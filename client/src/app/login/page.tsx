@@ -45,7 +45,7 @@ export default function LoginPage() {
           />
 
           <p className="mt-6 text-center text-[11px] text-slate-600 font-mono">
-            // No password needed. One tap, you're in.
+            {"// No password needed. One tap, you're in."}
           </p>
         </div>
       </div>

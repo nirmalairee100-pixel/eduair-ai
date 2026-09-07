@@ -63,14 +63,14 @@ export default function PrivacyPolicyPage() {
           <section>
             <h2 className="font-serif text-lg font-semibold text-[#EDE4D3]">5. Security</h2>
             <p className="mt-2">
-              Your data is protected using Supabase's row-level security, meaning your content is
+              Your data is protected using Supabase’s row-level security, meaning your content is
               only accessible to your authenticated account. We use HTTPS for all traffic and do
               not store plaintext passwords when you sign in via Google OAuth.
             </p>
           </section>
 
           <section>
-            <h2 className="font-serif text-lg font-semibold text-[#EDE4D3]">6. Children's privacy</h2>
+            <h2 className="font-serif text-lg font-semibold text-[#EDE4D3]">6. Children’s privacy</h2>
             <p className="mt-2">
               EduAir AI is built for NEB/SEE students, many of whom are minors. We only collect
               the minimum data needed to operate the platform and do not use student data for

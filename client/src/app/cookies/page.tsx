@@ -19,8 +19,8 @@ export default function CookiePolicyPage() {
             <h2 className="font-serif text-lg font-semibold text-[#EDE4D3]">What cookies we use</h2>
             <p className="mt-2">
               EduAir AI uses cookies set by Supabase Auth to keep you signed in between visits.
-              These are strictly necessary cookies — the site can't authenticate you without
-              them. We don't use third-party advertising or tracking cookies.
+              These are strictly necessary cookies — the site can’t authenticate you without
+              them. We don’t use third-party advertising or tracking cookies.
             </p>
           </section>
 
@@ -38,14 +38,14 @@ export default function CookiePolicyPage() {
             <p className="mt-2">
               Because our cookies are essential for authentication, disabling them in your
               browser will prevent you from staying signed in to EduAir AI. If you clear your
-              browser's cookies, you'll simply need to sign in again.
+              browser’s cookies, you’ll simply need to sign in again.
             </p>
           </section>
 
           <section>
             <h2 className="font-serif text-lg font-semibold text-[#EDE4D3]">Changes</h2>
             <p className="mt-2">
-              If we ever introduce analytics or other non-essential cookies, we'll update this
+              If we ever introduce analytics or other non-essential cookies, we’ll update this
               page and, where required, ask for your consent first.
             </p>
           </section>

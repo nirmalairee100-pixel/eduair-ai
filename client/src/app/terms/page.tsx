@@ -19,7 +19,7 @@ export default function TermsOfServicePage() {
             <h2 className="font-serif text-lg font-semibold text-[#EDE4D3]">1. Acceptance of terms</h2>
             <p className="mt-2">
               By creating an account or using EduAir AI, you agree to these Terms of Service. If
-              you don't agree, please don't use the platform.
+              you don’t agree, please don’t use the platform.
             </p>
           </section>
 
@@ -30,7 +30,7 @@ export default function TermsOfServicePage() {
               AI chat, quiz generation, notes, PDF summarization, model question sets, and study
               planning. Content is generated using AI (Gemini and fallback providers) and is
               intended as a study aid, not a substitute for official NEB/CDC materials or your
-              school's curriculum.
+              school’s curriculum.
             </p>
           </section>
 
@@ -47,7 +47,7 @@ export default function TermsOfServicePage() {
           <section>
             <h2 className="font-serif text-lg font-semibold text-[#EDE4D3]">4. Accounts</h2>
             <p className="mt-2">
-              You're responsible for keeping your account credentials secure and for all activity
+              You’re responsible for keeping your account credentials secure and for all activity
               under your account. You must provide accurate information when signing up.
             </p>
           </section>
@@ -75,7 +75,7 @@ export default function TermsOfServicePage() {
           <section>
             <h2 className="font-serif text-lg font-semibold text-[#EDE4D3]">7. Acceptable use</h2>
             <p className="mt-2">
-              Don't use EduAir AI to generate harmful, harassing, or academically dishonest
+              Don’t use EduAir AI to generate harmful, harassing, or academically dishonest
               content beyond normal study aid use (e.g. impersonating official NEB materials for
               distribution as if they were real board-published papers), attempt to compromise
               platform security, or resell/redistribute the service without permission.
@@ -93,7 +93,7 @@ export default function TermsOfServicePage() {
           <section>
             <h2 className="font-serif text-lg font-semibold text-[#EDE4D3]">9. Limitation of liability</h2>
             <p className="mt-2">
-              EduAir AI is provided "as is" without warranties of any kind. We are not liable for
+              EduAir AI is provided “as is” without warranties of any kind. We are not liable for
               exam outcomes, decisions made based on AI-generated content, or service
               interruptions.
             </p>

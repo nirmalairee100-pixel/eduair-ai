@@ -6,7 +6,6 @@ import {
   NotebookPen,
   ArrowRight,
   Clock,
-  User,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
@@ -102,7 +101,7 @@ export default async function DashboardHome() {
 
         {/* CORE QUICK ACTION CARDS */}
         <section className="mb-10">
-          <p className="text-[10px] font-mono text-slate-600 uppercase tracking-widest mb-4">// System Drivers</p>
+          <p className="text-[10px] font-mono text-slate-600 uppercase tracking-widest mb-4">{"// System Drivers"}</p>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {QUICK_ACTIONS.map(({ href, icon: Icon, label, desc }) => (
               <Link
@@ -132,7 +131,7 @@ export default async function DashboardHome() {
             <div className="flex items-center gap-2">
               <Clock size={13} className="text-slate-600" />
               <h2 className="font-bold text-xs tracking-wider text-slate-400 uppercase font-mono">
-                // Recent Context Indexes
+                {"// Recent Context Indexes"}
               </h2>
             </div>
 

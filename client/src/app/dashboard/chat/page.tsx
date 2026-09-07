@@ -57,7 +57,7 @@ export default function ChatPage() {
       };
 
       setMessages([...updatedMessages, assistantMessage]);
-    } catch (err) {
+    } catch {
       setMessages([
         ...updatedMessages,
         {
