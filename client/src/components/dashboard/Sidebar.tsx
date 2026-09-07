@@ -68,9 +68,11 @@ export default function Sidebar({
       
       {/* BRAND SYSTEM EMBLEM */}
       <div className="flex items-center gap-2.5 px-6 py-6 cursor-pointer" onClick={() => router.push("/dashboard")}>
-        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-600 to-indigo-700 text-white font-black text-xs shadow-md border border-indigo-500/20">
-          E
-        </div>
+        <img
+          src="/icon-192.png"
+          alt="EduAir"
+          className="h-8 w-8 rounded-lg object-contain"
+        />
         <span className="text-sm font-bold tracking-tight text-white">
           EduAir<span className="text-indigo-400">.ai</span>
         </span>

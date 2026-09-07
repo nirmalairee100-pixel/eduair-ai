@@ -36,9 +36,11 @@ export default function MobileNav({
         <Menu size={16} />
       </button>
       <div className="flex items-center gap-2">
-        <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-indigo-600 to-indigo-700 text-white font-black text-[10px] shadow-md border border-indigo-500/20">
-          E
-        </div>
+        <img
+          src="/icon-192.png"
+          alt="EduAir"
+          className="h-6 w-6 rounded-md object-contain"
+        />
         <span className="text-sm font-bold tracking-tight text-white">
           EduAir<span className="text-indigo-400">.ai</span>
         </span>
