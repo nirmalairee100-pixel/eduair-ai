@@ -21,7 +21,7 @@ export default function Navbar() {
         <button onClick={() => router.push("/features")}>Features</button>
         <button onClick={() => router.push("/pricing")}>Pricing</button>
         <button onClick={() => router.push("/schools")}>For Schools</button>
-        <button onClick={() => router.push("/about")}>About</button>
+        <button onClick={() => router.push("/about")}>About EduAir</button>
         <button onClick={() => router.push("/contact")}>Contact</button>
       </div>
 
