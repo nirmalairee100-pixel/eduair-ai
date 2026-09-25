@@ -17,10 +17,10 @@ export default function Navbar({ user }: { user: User | null }) {
 
         <nav className="hidden gap-8 text-sm font-medium text-slate-600 md:flex">
           <a href="#features" className="hover:text-indigo-600">Features</a>
-          <a href="#pricing" className="hover:text-indigo-600">Pricing</a>
-          <a href="#schools" className="hover:text-indigo-600">For Schools</a>
+          <Link href="/pricing" className="hover:text-indigo-600">Pricing</Link>
+          <Link href="/schools" className="hover:text-indigo-600">For Schools</Link>
           <a href="#about" className="hover:text-indigo-600">About</a>
-          <a href="#contact" className="hover:text-indigo-600">Contact</a>
+          <Link href="/contact" className="hover:text-indigo-600">Contact</Link>
         </nav>
 
         <div className="flex items-center gap-4">

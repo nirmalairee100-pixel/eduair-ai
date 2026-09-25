@@ -1,5 +1,5 @@
 import LoginButton from "@/components/landing/LoginButton";
-import { Star, MessageSquare, FileText, Sparkles, NotebookPen } from "lucide-react";
+import { MessageSquare, FileText, Sparkles, NotebookPen } from "lucide-react";
 
 export default function Hero() {
   return (
@@ -42,29 +42,6 @@ export default function Hero() {
           >
             Explore Features →
           </a>
-        </div>
-
-        <div className="mt-10 flex items-center gap-3">
-          <div className="flex -space-x-2">
-            {["bg-indigo-400", "bg-blue-400", "bg-violet-400", "bg-cyan-400", "bg-indigo-300"].map(
-              (c, i) => (
-                <div
-                  key={i}
-                  className={`h-8 w-8 rounded-full border-2 border-white ${c}`}
-                />
-              )
-            )}
-          </div>
-          <div>
-            <div className="flex gap-0.5 text-amber-400">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} size={14} fill="currentColor" strokeWidth={0} />
-              ))}
-            </div>
-            <p className="text-xs text-slate-500">
-              Trusted by students across Nepal — 10,000+ learners and growing
-            </p>
-          </div>
         </div>
       </div>
 
